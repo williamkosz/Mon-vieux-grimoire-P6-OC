@@ -31,14 +31,13 @@ module.exports.optimizeImage = (req, res, next ) => {
     const fileName = req.file.filename;
     const outputFilePath = path.join("images", `optimized_${fileName}`);
 
-  // Désactivation du cache !!!
-    sharp.cache(false);
+    // Modification des fichiers pour l'ajout du livre
     sharp(filePath)
         .resize({ height: 600 })
         .toFile(outputFilePath)
         .then(() => {
         console.log(`Image ${fileName} optimisée avec succès !`);
-        // Remplacer le fichier original par le fichier optimisé
+        // Supprime le fichier original et remplace par le nouveau dans le dossier images
         fs.unlink(filePath, () => {
             req.file.path = outputFilePath;
             console.log(`Image ${fileName} supprimée avec succès !`);
