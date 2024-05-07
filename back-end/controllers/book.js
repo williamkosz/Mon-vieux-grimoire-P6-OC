@@ -9,7 +9,7 @@ exports.createBook = (req, res, next) => {
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.sharpFileName}`
+        imageUrl: `${req.protocol}://${req.get('host')}/images/optimized_${req.file.filename}`
     });
   
     book.save()

@@ -1,22 +1,52 @@
-// Middleware multer-config.js
-const multer = require("multer");
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require ('path')
+const fs = require ('fs')
 
-const storage = multer.memoryStorage();
+const MIME_TYPES = {
+  'image/jpg': 'jpg',
+  'image/jpeg': 'jpg',
+  'image/png': 'png'
+};
 
-const upload = multer({ storage }).single("image");
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, 'images');
+  },
+  filename: (req, file, callback) => {
+    const name = file.originalname.split(' ').join('_');
+    const extension = MIME_TYPES[file.mimetype];
+    callback(null, name + Date.now() + '.' + extension);
+  }
+});
 
-module.exports = (req, res, next) => {
-    upload(req, res, (error) => {
-        if (error instanceof multer.MulterError) {
-            // Une erreur multer s'est produite lors de l'upload du fichier
-            res.status(400).json({ error: "Une erreur est survenue lors du téléchargement du fichier." });
-        } else if (error) {
-            // Une erreur inattendue s'est produite
-            console.error("Erreur lors de l'upload du fichier :", error);
-            res.status(500).json({ error: "Une erreur est survenue lors du téléchargement du fichier." });
-        } else {
-            // Tout s'est bien passé, passez au prochain middleware
+module.exports = multer({storage: storage}).single('image');
+
+module.exports.optimizeImage = (req, res, next ) => {
+    if(!req.file) {
+        return next();
+    }
+
+    const filePath = req.file.path;
+    const fileName = req.file.filename;
+    const outputFilePath = path.join("images", `optimized_${fileName}`);
+
+  // Désactivation du cache !!!
+    sharp.cache(false);
+    sharp(filePath)
+        .resize({ height: 600 })
+        .toFile(outputFilePath)
+        .then(() => {
+        console.log(`Image ${fileName} optimisée avec succès !`);
+        // Remplacer le fichier original par le fichier optimisé
+        fs.unlink(filePath, () => {
+            req.file.path = outputFilePath;
+            console.log(`Image ${fileName} supprimée avec succès !`);
             next();
-        }
+        });
+    })
+        .catch((err) => {
+            console.log(err);
+            return next();
     });
 };
