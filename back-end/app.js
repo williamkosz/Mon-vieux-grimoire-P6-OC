@@ -6,6 +6,7 @@ const path = require('path');
 const bookRoutes = require("./routes/book.js");
 const userRoutes = require("./routes/user.js");
 
+// Connexion à la BDD
 connectDB();
 
 const app = express();
