@@ -2,7 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/config.js");
 const path = require('path');
-
+const dotenv = require ('dotenv')
+dotenv.config();
 const bookRoutes = require("./routes/book.js");
 const userRoutes = require("./routes/user.js");
 
