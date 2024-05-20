@@ -3,22 +3,30 @@ const sharp = require('sharp');
 const path = require ('path')
 const fs = require ('fs')
 
-const MIME_TYPES = {
-  'image/jpg': 'jpg',
-  'image/jpeg': 'jpg',
-  'image/png': 'png'
-};
+
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, 'images');
   },
   filename: (req, file, callback) => {
-    const name = file.originalname.split(' ').join('_');
-    const extension = MIME_TYPES[file.mimetype];
-    callback(null, name + Date.now() + '.' + extension);
-  }
+    const name = file.originalname.slice(0, 3);
+    callback(null, name + Date.now() + ".webp");
+  },
+
+   // Vérification du type MIME du fichier
+   fileFilter: (req, file, callback) => {
+    !file.originalname.match(/\.(jpg|jpeg|png|webp)$/)
+      ? callback(
+          new Error("Seuls les fichiers JPG, JPEG et PNG sont autorisés !"),
+          false
+        )
+      : callback(null, true);
+  },
 });
+
+
+
 
 module.exports = multer({storage: storage}).single('image');
 
