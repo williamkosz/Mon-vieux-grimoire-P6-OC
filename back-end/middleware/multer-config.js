@@ -6,9 +6,11 @@ const fs = require ('fs')
 
 
 const storage = multer.diskStorage({
+
   destination: (req, file, callback) => {
     callback(null, 'images');
   },
+  
   filename: (req, file, callback) => {
     const name = file.originalname.slice(0, 3);
     callback(null, name + Date.now() + ".webp");
